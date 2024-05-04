@@ -6,8 +6,9 @@
 #'
 #' @description Simple Time Series Modelling Using Gaussian Processes
 #'
-#' @importFrom stats reshape
+#' @useDynLib tsgp
+#' @importFrom stats reshape qnorm median
 #' @import Rcpp
 #' @importFrom MASS mvrnorm
-#' @importFrom ggplot2 ggplot aes geom_line labs theme_bw theme geom_tile scale_fill_viridis_c
+#' @importFrom ggplot2 ggplot aes geom_line labs theme_bw theme geom_tile scale_fill_viridis_c geom_point geom_ribbon
 NULL

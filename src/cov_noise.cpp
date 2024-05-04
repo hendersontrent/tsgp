@@ -9,6 +9,7 @@ using namespace Rcpp;
 //' @author Trent Henderson
 //' @examples
 //' cov_noise_cpp(0.05, 100)
+// [[Rcpp::export]]
 NumericMatrix cov_noise_cpp(double sigma, int n) {
   NumericMatrix K(n, n);
 

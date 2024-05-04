@@ -8,8 +8,8 @@
 #' @author Trent Henderson
 #' @export
 #' @examples
-#' x <- 1:100
-#' cov_exp_quad(x, x, 0.05, 1)
+#' x1 <- seq(from = -2, to = 2, length.out = 100)
+#' cov_exp_quad(x1, x1, 0.05, 1)
 #'
 
 cov_exp_quad <- function(xa, xb, sigma = 1, l = 1){
@@ -29,8 +29,8 @@ cov_exp_quad <- function(xa, xb, sigma = 1, l = 1){
 #' @author Trent Henderson
 #' @export
 #' @examples
-#' x <- 1:100
-#' cov_rat_quad(x, x, 0.05, 1, 1)
+#' x1 <- seq(from = -2, to = 2, length.out = 100)
+#' cov_rat_quad(x1, x1, 0.05, 1, 1)
 #'
 
 cov_rat_quad <- function(xa, xb, sigma = 1, alpha = 1, l = 1){
@@ -50,8 +50,8 @@ cov_rat_quad <- function(xa, xb, sigma = 1, alpha = 1, l = 1){
 #' @author Trent Henderson
 #' @export
 #' @examples
-#' x <- 1:100
-#' cov_periodic(x, x, 0.05, 1, 1)
+#' x1 <- seq(from = -2, to = 2, length.out = 100)
+#' cov_periodic(x1, x1, 0.05, 1, 1)
 #'
 
 cov_periodic <- function(xa, xb, sigma = 1, l = 1, p = 1){
@@ -87,8 +87,8 @@ cov_noise <- function(sigma = 0.5, n){
 #' @return \code{NumericMatrix} of covariance
 #' @author Trent Henderson
 #' @examples
-#' x <- 1:100
-#' cov_linear(x, x, 0.05, 1, 1)
+#' x1 <- seq(from = -2, to = 2, length.out = 100)
+#' cov_linear(x1, x1, 0.05, 1, 1)
 #'
 
 cov_linear <- function(xa, xb, sigma_b = 1, sigma_v = 1, c = 1){

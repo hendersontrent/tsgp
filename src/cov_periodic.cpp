@@ -11,8 +11,9 @@ using namespace Rcpp;
 //' @return \code{NumericMatrix} of covariance
 //' @author Trent Henderson
 //' @examples
-//' x <- 1:100
-//' cov_periodic_cpp(x, x, 0.05, 1, 1)
+//' x1 <- seq(from = -2, to = 2, length.out = 100)
+//' cov_periodic_cpp(x1, x1, 0.05, 1, 1)
+// [[Rcpp::export]]
 NumericMatrix cov_periodic_cpp(NumericVector xa, NumericVector xb, double sigma, double l, int p) {
   int n1 = xa.size();
   int n2 = xb.size();
