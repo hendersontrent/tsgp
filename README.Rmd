@@ -1,0 +1,20 @@
+---
+output: rmarkdown::github_document
+---
+
+# tsgp
+
+Simple, lightweight R package for fitting, visualising, and predicting time-series data using Gaussian processes.
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+comment = NA, fig.width = 7, fig.height = 5, cache = FALSE)
+```
+
+## Installation
+
+You can install the development version of `tsgp` from GitHub using the following:
+
+```{r eval = FALSE}
+devtools::install_github("hendersontrent/tsgp")
+```
