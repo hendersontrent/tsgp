@@ -41,4 +41,4 @@ Currently, `tsgp` supports the following covariance functions (kernels):
 
 ## Performance
 
-`tsgp` is *extremely* fast at what it does.
+`tsgp` is *extremely* fast at what it does. Well, as fast as it can be given the $\mathcal{O}(N^{3})\$ computation time of inverting a matrix involved in fitting a GP.

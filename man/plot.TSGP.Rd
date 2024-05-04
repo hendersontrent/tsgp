@@ -22,7 +22,7 @@
 Plot summary of draws from GP posterior
 }
 \examples{
-#' x1 <- 1:100
+x1 <- 1:100
 y <- 3 * sin(2 * seq(0, 4 * pi, length.out = 100)) + runif(100) * 2 + (0.08 * seq(from = 1, to = 100, by = 1))
 
 CovSum <- function(xa, xb, sigma_1 = 1, sigma_2 = 1, l_1 = 1, l_2 = 1, p = 1){
