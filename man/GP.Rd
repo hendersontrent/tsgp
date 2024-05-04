@@ -14,6 +14,8 @@ GP(x, xprime, y, covfun, sigma_noise = 0.5, ...)
 \item{y}{\code{numeric} vector values to learn from}
 
 \item{covfun}{\code{function} specifying the covariance function to use}
+
+\item{sigma_noise}{\code{numeric} scalar denoting the variance of the noise to be added to the covariance matrix. Defaults to \code{0.5}}
 }
 \value{
 \code{TSGP} object containing the input data, posterior mean function and covariance matrix
@@ -28,7 +30,6 @@ y <- 3 * sin(2 * seq(0, 4 * pi, length.out = 100)) + runif(100) * 2 + (0.08 * se
 CovSum <- function(xa, xb, sigma_1 = 1, sigma_2 = 1, l_1 = 1, l_2 = 1, p = 1){
   Sigma_exp_quad <- cov_exp_quad(xa, xb, sigma_1, l_1)
   Sigma_periodic <- cov_periodic(xa, xb, sigma_2, l_2, p)
-  Sigma_noise <- cov_noise(sigma_3, nrow(Sigma_exp_quad))
   Sigma <- Sigma_exp_quad + Sigma_periodic
   return(Sigma)
 }

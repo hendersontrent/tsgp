@@ -2,7 +2,7 @@
 output: rmarkdown::github_document
 ---
 
-# tsgp
+# tsgp <img src="man/figures/logo.png" align="right" width="120" />
 
 Simple, lightweight R package for fitting, visualising, and predicting time-series data using Gaussian processes.
 
@@ -41,4 +41,4 @@ Currently, `tsgp` supports the following covariance functions (kernels):
 
 ## Performance
 
-`tsgp` is *extremely* fast at what it does. Well, as fast as it can be given the $\mathcal{O}(N^{3})\$ computation time of inverting a matrix involved in fitting a GP.
+`tsgp` is *extremely* fast at what it does. Well, as fast as it can be given the $\mathcal{O}(N^{3})$ computation time of inverting a matrix involved in fitting a GP. A full model with trend, seasonality, and noise can be calculated on a time series of $T = 1000$ time points in a few seconds. This makes it an ideal tool for iterative model building and principled time-series exploration.
