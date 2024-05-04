@@ -4,6 +4,7 @@
 #' @param xprime \code{numeric} vector of data points to predict
 #' @param y \code{numeric} vector values to learn from
 #' @param covfun \code{function} specifying the covariance function to use
+#' @param sigma_noise \code{numeric} scalar denoting the variance of the noise to be added to the covariance matrix. Defaults to \code{0.5}
 #' @return \code{TSGP} object containing the input data, posterior mean function and covariance matrix
 #' @author Trent Henderson
 #' @export
@@ -30,6 +31,6 @@ GP <- function(x, xprime, y, covfun, sigma_noise = 0.5, ...){
   mu_2 <- Sigma_inv %*% y # Posterior mean vector
   gp <- list(x, xprime, y, mu_2, Sigma_2)
   names(gp) <- c("x", "xprime", "y", "mu", "Sigma")
-  gp <- structure(gp, class = c("GaussProc", "list"))
+  gp <- structure(gp, class = c("TSGP", "list"))
   return(gp)
 }
