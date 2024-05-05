@@ -81,7 +81,7 @@ plot(mat_exp_quad, x2, type = "prior", k = 5)
 
 The second is a plot of the covariance matrix represented as a heatmap:
 
-```{r, message = FALSE, warning = FALSE}
+```{r, message = FALSE, warning = FALSE, fig.width = 6, fig.height = 6}
 plot(mat_exp_quad, type = "matrix")
 ``` 
 
@@ -171,4 +171,24 @@ Here is an example:
 
 ```{r, message = FALSE, warning = FALSE}
 plot(mod, 0.95, 100)
+```
+
+Here is another for a model which predicts $50$ time points:
+
+```{r, message = FALSE, warning = FALSE}
+mod2 <- GP(x1, seq(from = 1, to = 100, by = 2), y, CovSum, 1e-9,
+           sigma_1 = 5, sigma_2 = 1, sigma_3 = 1.2, 
+           l_1 = 75, l_2 = 1, p = 25)
+
+plot(mod2, 0.95, 100)
+```
+
+What about a short-range forecast?
+
+```{r, message = FALSE, warning = FALSE}
+mod3 <- GP(x1, 101:150, y, CovSum, 1e-9,
+           sigma_1 = 5, sigma_2 = 1, sigma_3 = 1.2, 
+           l_1 = 75, l_2 = 1, p = 25)
+
+plot(mod3, 0.95, 100)
 ```

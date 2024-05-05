@@ -141,6 +141,7 @@ plot.TSGP <- function(x, prob = 0.95, draws = 100, ...){
 
   colnames(posterior) <- c("draw", "y", "timepoint")
   rownames(posterior) <- NULL
+  posterior$timepoint <- rep(sort(x$xprime), times = draws)
   posterior_ct <- aggregate(y ~ timepoint, data = posterior, FUN = function(x) mean(x, na.rm = TRUE))
   colnames(posterior_ct) <- c("timepoint", "mu")
   posterior_sd <- data.frame(timepoint = x$xprime, sigma = sqrt(diag(x$Sigma))) # SD is square root of variance

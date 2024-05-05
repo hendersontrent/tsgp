@@ -366,7 +366,7 @@ Intuitively, we see that the prediction intervals widen (i.e., become more uncer
 Finally, `tsgp` can also produce plausible short-term-horizon forecasts on out-of-sample time points:
 
 ```{r, message = FALSE, warning = FALSE}
-mod3 <- GP(x1, length(y):150, y, CovSum, 1e-9,
+mod3 <- GP(x1, 101:150, y, CovSum, 1e-9,
            sigma_1 = 5, sigma_2 = 1, sigma_3 = 1.2, 
            l_1 = 75, l_2 = 1, p = 25)
 
