@@ -4,7 +4,16 @@
 \alias{GP}
 \title{Calculate posterior mean vector and covariance matrix}
 \usage{
-GP(x, xprime, y, covfun, epsilon = 1e-09, ...)
+GP(
+  x,
+  xprime,
+  y,
+  covfun,
+  epsilon = 1e-09,
+  optim = FALSE,
+  method = c("L-BFGS-B", "Nelder-Mead", "BFGS", "CG", "SANN", "Brent"),
+  ...
+)
 }
 \arguments{
 \item{x}{\code{numeric} vector of input data}
@@ -16,6 +25,10 @@ GP(x, xprime, y, covfun, epsilon = 1e-09, ...)
 \item{covfun}{\code{function} specifying the covariance function to use}
 
 \item{epsilon}{\code{numeric} scalar denoting a small quantity to add to the (x, x) covariance matrix for numerical stability. Defaults to \code{1e-9}}
+
+\item{optim}{\code{Boolean} whether to optimise hyperparameters using negative marginal log likelihood. Defaults to \code{FALSE}}
+
+\item{method}{\code{character} denoting the optimisation algorithm in \code{stats::optim} to use if \code{optim = TRUE}. Defaults to \code{"L-BFGS-B"}}
 
 \item{...}{covariance function hyperparameters to be passed to the covariance functions within \code{cov_function}}
 }

@@ -6,7 +6,7 @@
 #' @param y \code{numeric} vector of values to learn from
 #' @param covfun \code{function} specifying the covariance function to use
 #' @param epsilon \code{numeric} scalar denoting a small quantity to add to the (x, x) covariance matrix for numerical stability. Defaults to \code{1e-9}
-#' @param optim \code{Boolean} whether to optimise hyperparameters for covariance functions using negative log likelihood. Defaults to \code{FALSE}
+#' @param optim \code{Boolean} whether to optimise hyperparameters using negative marginal log likelihood. Defaults to \code{FALSE}
 #' @param method \code{character} denoting the optimisation algorithm in \code{stats::optim} to use if \code{optim = TRUE}. Defaults to \code{"L-BFGS-B"}
 #' @param ... covariance function hyperparameters to be passed to the covariance functions within \code{cov_function}
 #' @return \code{TSGP} object containing the input data, posterior mean function and covariance matrix

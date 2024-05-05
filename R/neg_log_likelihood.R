@@ -1,4 +1,4 @@
-#' Calculate negative log likelihood of a Gaussian process regression model
+#' Calculate negative marginal log likelihood of a Gaussian process regression model
 #'
 #' @param params \code{vector} of hyperparameters
 #' @param x \code{numeric} vector of input data
