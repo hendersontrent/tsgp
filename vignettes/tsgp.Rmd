@@ -16,7 +16,7 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.height = 7,
+  fig.height = 4,
   fig.width = 7,
   warning = FALSE,
   fig.align = "center"
@@ -25,6 +25,150 @@ knitr::opts_chunk$set(
 
 ```{r setup, message = FALSE, warning = FALSE}
 library(tsgp)
+library(ggplot2)
 ```
 
+## Purpose
 
+`tsgp` is a lightweight package for modelling univariate time-series data with Gaussian processes (GP). It is important to remember that using a GP for time series basically converts the problem from one of modelling a *generative process* (e.g., if we used an [ARIMA](https://en.wikipedia.org/wiki/Autoregressive_integrated_moving_average) model) to that of essentially a curve-fitting exercise. GPs are a [Bayesian](https://en.wikipedia.org/wiki/Bayesian_statistics) method, so if you are unfamiliar with Bayesian inference, please go check out some resources on that, such as [this great video](https://www.youtube.com/watch?v=guTdrfycW2Q&list=PLDcUM9US4XdMROZ57-OIRtIK0aOynbgZN&index=4) by Richard McElreath. Essentially, the key bits to remember for this post is that in Bayesian inference, we are interested in the posterior distribution, which is proportional to the product of the prior (our beliefs about an event before seeing the data) and the likelihood (the probability of the data given model parameters).
+
+If you would like a deeper treatment of how GPs can model time-series data, please see [this post](https://hendersontrent.github.io/posts/2024/05/gaussian-process-time-series/).
+
+## Generating some data
+
+We are going to simulate some time series data with temporal dynamics that are commonly encountered in applied settings. Specifically, we are going to generate a noisy sine wave (i.e., to emulate periodic or seasonal data) with a linearly increasing trend:
+
+```{r, message = FALSE, warning = FALSE}
+set.seed(123)
+y <- 3 * sin(2 * seq(0, 4 * pi, length.out = 100)) + runif(100) * 2
+trend <- 0.08 * seq(from = 1, to = 100, by = 1)
+y <- y + trend
+tmp <- data.frame(timepoint = 1:length(y), y = y)
+x1 <- 1:length(y)
+
+# Draw plot
+
+ggplot(data = tmp) +
+  geom_point(aes(x = timepoint, y = y), colour = "black") +
+  geom_line(aes(x = timepoint, y = y), colour = "black") +
+  labs(x = "Timepoint",
+       y = "Values") +
+  theme_bw()
+```
+
+## Package functionality
+
+### Covariance functions
+
+`tsgp` contains several covariance functions (coded in C++ for efficiency). All of them return an object of class `GPCov` (which is just a matrix but with a new inherited class that allows us to make use of R's generic functions).
+
+#### Exponentiated quadratic
+
+`cov_exp_quad` takes the following arguments:
+
+* `xa` --- vector of values
+* `xb` --- vector of values
+* `sigma` --- scalar denoting the variance. Defaults to `1`
+* `l` --- scalar denoting the lengthscale. Defaults to `1`
+
+We can produce two types of plots for `GPCov` objects by calling the `plot()` generic. The first is a plot of samples from the prior distribution, which we specify by setting `type = "prior"`, passing in the input vector (`x2` in this example), and setting the number of samples to draw through the argument `k`. Here is an example:
+
+```{r, message = FALSE, warning = FALSE}
+x2 <- seq(from = -2, to = 2, length.out = 100)
+mat_exp_quad <- cov_exp_quad(x2, x2, 1, 1)
+plot(mat_exp_quad, x2, type = "prior", k = 5)
+``` 
+
+The second is a plot of the covariance matrix represented as a heatmap:
+
+```{r, message = FALSE, warning = FALSE}
+plot(mat_exp_quad, type = "matrix")
+``` 
+
+#### Rational quadratic
+
+`cov_rat_quad` takes the following arguments:
+
+* `xa` --- vector of values
+* `xb` --- vector of values
+* `sigma` --- scalar denoting the variance. Defaults to `1`
+* `alpha` --- scalar $>0$ denoting the mixing coefficient. Defaults to `1`
+* `l` --- scalar denoting the lengthscale. Defaults to `1`
+
+#### Periodic
+
+`cov_periodic` takes the following arguments:
+
+* `xa` --- vector of values
+* `xb` --- vector of values
+* `sigma` --- scalar denoting the variance. Defaults to `1`
+* `l` --- scalar denoting the lengthscale. Defaults to `1`
+* `p` --- scalar denoting the period. Defaults to `1`
+
+#### Linear
+
+`cov_linear` takes the following arguments:
+
+* `xa` --- vector of values
+* `xb` --- vector of values
+* `sigma_b` --- scalar denoting the constant variance. Defaults to `1`
+* `sigma_v` --- scalar denoting the constant variance. Defaults to `1`
+* `c` --- scalar denoting the offset. Defaults to `1`
+
+#### White noise
+
+`cov_noise` takes the following arguments:
+
+* `xa` --- vector of values
+* `xb` --- vector of values
+* `sigma` --- scalar denoting the variance. Defaults to `0.5`
+
+#### Combining covariance functions
+
+Often in time-series analysis we need our models to capture multiple different statistical dynamics simultaneusly, such as trend, seasonality, and noise. It is quite easy to define a custom composite kernel function which either sums or multiplies different kernels:
+
+```{r, message = FALSE, warning = FALSE}
+CovSum <- function(xa, xb, sigma_1 = 1, sigma_2 = 1, sigma_3 = 1, l_1 = 1, l_2 = 1, p = 1){
+  X <- cov_exp_quad(xa, xb, sigma_1, l_1) + 
+    cov_periodic(xa, xb, sigma_2, l_2, p) + 
+    cov_noise(xa, xb, sigma_3)
+  
+  X <- structure(X, class = c("GPCov", "matrix"))
+  return(X)
+}
+```
+
+### Model fitting
+
+The core `GP` function in `tsgp` to calculate the posterior mean vector and covariance matrix. `GP` returns an object of class `x` which is a list of the input data, the posterior mean vector, and the posterior covariance matrix. `GP` takes the following arguments:
+
+* `x` --- vector of input data
+* `xprime` --- vector of data points to predict values for
+* `y` --- vector of values to learn from
+* `covfun` --- function specifying the covariance
+* `epsilon` --- small quantity to add to the $(x, x)$ covariance matrix for numerical stability. Defaults to $1e^{-9}$
+* `...` --- hyperparameters to be passed to `cov_function`
+
+Here is an example for a model which predicts values for a set of uniformally-distributed time points over the $[1-100]$ domain:
+
+```{r, message = FALSE, warning = FALSE}
+mod <- GP(x1, seq(from = 1, to = 100, by = 5), y, CovSum, 1e-9,
+           sigma_1 = 5, sigma_2 = 1, sigma_3 = 1.2, 
+           l_1 = 75, l_2 = 1, p = 25)
+
+names(mod)
+```
+
+### Model visualisation
+
+We can easily visualise draws from the posterior distribution by calling `plot()` on a `TSGP` object. The `plot()` generic for `TSGP` takes only three arguments:
+
+1. `x` --- `TSGP` model object
+2. `prob` --- desired credible interval probability level. Defaults to `0.95` for a $95\%$ credible interval
+3. `draws` --- number of posterior draws to summarise over. Defaults to $100$
+
+Here is an example:
+
+```{r, message = FALSE, warning = FALSE}
+plot(mod, 0.95, 100)
+```

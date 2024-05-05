@@ -4,12 +4,14 @@
 \alias{cov_noise}
 \title{Compute a white noise covariance matrix}
 \usage{
-cov_noise(sigma = 0.5, n)
+cov_noise(xa, xb, sigma = 0.5)
 }
 \arguments{
-\item{sigma}{\code{numeric} scalar denoting the variance. Defaults to \code{0.5}}
+\item{xa}{\code{numeric} vector of values}
 
-\item{n}{\code{integer} scalar denoting the number of rows and columns required in the covariance matrix}
+\item{xb}{\code{numeric} vector of values}
+
+\item{sigma}{\code{numeric} scalar denoting the variance. Defaults to \code{0.5}}
 }
 \value{
 \code{GPCov} containing the covariance matrix
@@ -18,7 +20,8 @@ cov_noise(sigma = 0.5, n)
 Compute a white noise covariance matrix
 }
 \examples{
-cov_noise(0.05, 100)
+x1 <- seq(from = -2, to = 2, length.out = 100)
+cov_noise(x1, x1, 0.5)
 
 }
 \author{

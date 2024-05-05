@@ -34,14 +34,16 @@ cov_linear_cpp <- function(xa, xb, sigma_b, sigma_v, c) {
 
 #' Compute a white noise covariance matrix
 #'
+#' @param xa \code{NumericVector} of values
+#' @param xb \code{NumericVector} of values
 #' @param sigma \code{double} denoting the variance
-#' @param n \code{int} denoting the number of rows and columns required in the covariance matrix
 #' @return \code{NumericMatrix} of covariance
 #' @author Trent Henderson
 #' @examples
-#' cov_noise_cpp(0.05, 100)
-cov_noise_cpp <- function(sigma, n) {
-    .Call('_tsgp_cov_noise_cpp', PACKAGE = 'tsgp', sigma, n)
+#' x1 <- seq(from = -2, to = 2, length.out = 100)
+#' cov_noise_cpp(x1, x1, 0.5)
+cov_noise_cpp <- function(xa, xb, sigma) {
+    .Call('_tsgp_cov_noise_cpp', PACKAGE = 'tsgp', xa, xb, sigma)
 }
 
 #' Compute a periodic covariance matrix

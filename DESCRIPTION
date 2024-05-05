@@ -2,7 +2,7 @@ Package: tsgp
 Type: Package
 Title: Simple Time Series Modelling Using Gaussian Processes
 Version: 0.1.0
-Date: 2024-05-04
+Date: 2024-05-05
 Authors@R: c(
   person("Trent", "Henderson", email = "then6675@uni.sydney.edu.au", role = c("cre", "aut"))
   )

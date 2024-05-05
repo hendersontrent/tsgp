@@ -16,7 +16,7 @@ vignette: >
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.height = 7,
+  fig.height = 4,
   fig.width = 7,
   warning = FALSE,
   fig.align = "center"
@@ -31,13 +31,15 @@ library(TSA)
 
 ## Purpose
 
-`tsgp` is a lightweight package for modelling univariate time-series data with Gaussian processes (GP). It is important to remember that using a GP for time series basically converts the problem from one of modelling a *generative process* (e.g., if we used an [ARIMA](https://en.wikipedia.org/wiki/Autoregressive_integrated_moving_average) model) to that of essentially a curve-fitting exercise. GPs are a [Bayesian](https://en.wikipedia.org/wiki/Bayesian_statistics) method, so if you are unfamiliar with Bayesian inference, please go check out some resources on that, such as [this great video](https://www.youtube.com/watch?v=guTdrfycW2Q&list=PLDcUM9US4XdMROZ57-OIRtIK0aOynbgZN&index=4) by Richard McElreath. Essentially, the key bits to remember for this post is that in Bayesian inference, we are interested in the posterior distribution, which is proportional to the product of the prior (our beliefs about an event before seeing the data) and the likelihood (the probability of the data given model parameters). Throughout this post, we are going to build a basic GP from scratch to highlight the intuition and mechanics underlying the modelling process.
+`tsgp` is a lightweight package for modelling univariate time-series data with Gaussian processes (GP). It is important to remember that using a GP for time series basically converts the problem from one of modelling a *generative process* (e.g., if we used an [ARIMA](https://en.wikipedia.org/wiki/Autoregressive_integrated_moving_average) model) to that of essentially a curve-fitting exercise. GPs are a [Bayesian](https://en.wikipedia.org/wiki/Bayesian_statistics) method, so if you are unfamiliar with Bayesian inference, please go check out some resources on that, such as [this great video](https://www.youtube.com/watch?v=guTdrfycW2Q&list=PLDcUM9US4XdMROZ57-OIRtIK0aOynbgZN&index=4) by Richard McElreath. Essentially, the key bits to remember for this post is that in Bayesian inference, we are interested in the posterior distribution, which is proportional to the product of the prior (our beliefs about an event before seeing the data) and the likelihood (the probability of the data given model parameters).
+
+*NOTE: This vignette is a condensed version of a deeper treatment of how GPs can model time-series data which is available to be read [here](https://hendersontrent.github.io/posts/2024/05/gaussian-process-time-series/).*
 
 ## Generating some data
 
 We are going to simulate some time series data with temporal dynamics that are commonly encountered in applied settings. Specifically, we are going to generate a noisy sine wave (i.e., to emulate periodic or seasonal data) with a linearly increasing trend:
 
-```{r, message = FALSE, warning = FALSE, fig.width = 7, fig.height = 4}
+```{r, message = FALSE, warning = FALSE}
 set.seed(123)
 y <- 3 * sin(2 * seq(0, 4 * pi, length.out = 100)) + runif(100) * 2
 trend <- 0.08 * seq(from = 1, to = 100, by = 1)
@@ -110,7 +112,7 @@ $$
 
 where $\sigma^{2}$ is the variance (average distance of a function away from its mean) and $\mathcal{l}$ is the lengthscale (the length of the "wiggles" in a function). You can refer to these as *hyperparameters* that we can set or learn to control the shape of the kernel.
 
-In `tsgp`, this kernel is accessed via the function `cov_exp_quad` which returns an object of class `GPCov` (which is just a matrix but with a new inherited class that allows us to make use of R's generic functions). We can visualise the  matrix of this function on a subset of datapoints from our vector `x1`. Let's say the first 5 points for clarity:
+In `tsgp`, this kernel is accessed via the function `cov_exp_quad` which returns an object of class `GPCov` (which is just a matrix but with a new inherited class that allows us to make use of R's generic functions). We can visualise the matrix of this function on a subset of datapoints from our vector `x1`. Let's say the first 5 points for clarity:
 
 ```{r, message = FALSE, warning = FALSE}
 mat_exp_quad <- cov_exp_quad(x1, x1, 1, 1)
@@ -307,37 +309,66 @@ We can summarise this using conditional probability for the posterior distributi
 
 Remember that $\mu_{1} = m(X_{1})$ (mean function of $n_{1} \times 1$ size) and $\Sigma_{11} = k(X_{1}, X_{1})$ (covariance function of size $n_{1} \times n_{1}$) specifies our GP. This can be broken down further to get the [conditional distributions](https://en.wikipedia.org/wiki/Conditional_probability), but I will save you the linear algebra (see [this post](https://peterroelants.github.io/posts/gaussian-process-tutorial/) for a nice overview). However, it is this linear algebra that makes GPs tricky to apply in practice, especially when our input data is very large. GPs rely on computing the [inverse](https://en.wikipedia.org/wiki/Invertible_matrix) of covariance matrices, pushing their computation time to $\mathcal{O}(N^{3})$ (compared to $\mathcal{O}(N)$ for standard Bayesian linear regression). Keep this in mind if you decide to use GPs in your own work.
 
-Before we define the GP itself, for ease and clarity, we are going to construct a composite kernel of a trend, seasonality, and noise. `tsgp` has a function `composite` for doing exactly this. `composite` only takes two arguments:
-
-1. `kernels` --- a list of all the individual covariance functions
-2. `combine` --- character specifying whether to add (`combine = "add"`) or multiply (`combine = "mul"`) the kernels together
-
-`composite` also returns on object of class `GPCov` so that the composite matrix can be readily used with the other package generic functions
+Before we define the GP itself, for ease and clarity, we are going to define a simple function which automatically computes and sums the covariance functions we want.
 
 ```{r, message = FALSE, warning = FALSE}
-CovSum <- function(xa, xb, sigma_1 = 1, sigma_2 = 1, l_1 = 1, l_2 = 1, p = 1){
+CovSum <- function(xa, xb, sigma_1 = 1, sigma_2 = 1, sigma_3 = 1, l_1 = 1, l_2 = 1, p = 1){
   Sigma_exp_quad <- cov_exp_quad(xa, xb, sigma_1, l_1)
   Sigma_periodic <- cov_periodic(xa, xb, sigma_2, l_2, p)
-  Sigma_noise <- cov_noise(0.8, nrow(Sigma_exp_quad))
-  Sigma <- Sigma_exp_quad + Sigma_periodic + Sigma_noise
-  return(Sigma)
+  Sigma_noise <- cov_noise(xa, xb, sigma_3)
+  X <- Sigma_exp_quad + Sigma_periodic + Sigma_noise
+  X <- structure(X, class = c("GPCov", "matrix"))
+  return(X)
 }
 ```
 
-Okay, we can now use the core `GP` function in `tsgp` to calculate the posterior mean vector and covariance matrix. We are going to predict values for a set of evenly-spaced time points across the $[1-100]$ domain. `GP` takes the following arguments:
+Okay, we can now use the core `GP` function in `tsgp` to calculate the posterior mean vector and covariance matrix. `GP` returns an object of class `x` which is a list of the input data, the posterior mean vector, and the posterior covariance matrix. `GP` takes the following arguments:
 
 * `x` --- vector of input data
 * `xprime` --- vector of data points to predict values for
 * `y` --- vector of values to learn from
-* `covfun` --- covariance function to use
+* `covfun` --- function specifying the covariance
 * `epsilon` --- small quantity to add to the $(x, x)$ covariance matrix for numerical stability. Defaults to $1e^{-9}$
+* `...` --- hyperparameters to be passed to `cov_function`
+
+Here is an example for a model which predicts values for every time point:
 
 ```{r, message = FALSE, warning = FALSE}
-mod <- GP(x1, 1:length(y), y, CovSum, 1e-9)
+mod <- GP(x1, 1:length(y), y, CovSum, 1e-9,
+           sigma_1 = 5, sigma_2 = 1, sigma_3 - 0.8, 
+           l_1 = 75, l_2 = 1, p = 25)
 ```
 
-x
+We can easily visualise draws from the posterior distribution by calling `plot()` on a `TSGP` object:
 
 ```{r, message = FALSE, warning = FALSE}
+plot(mod, 0.95, 100)
+```
 
+The `plot()` generic for `TSGP` takes only three arguments:
+
+1. `x` --- `TSGP` model object
+2. `prob` --- desired credible interval probability level. Defaults to `0.95` for a $95\%$ credible interval
+3. `draws` --- number of posterior draws to summarise over. Defaults to $100$
+
+What happens if we increase the noise (i.e., uncertainty)?
+
+```{r, message = FALSE, warning = FALSE}
+mod2 <- GP(x1, 1:length(y), y, CovSum, 1e-9,
+           sigma_1 = 5, sigma_2 = 1, sigma_3 = 1.2, 
+           l_1 = 75, l_2 = 1, p = 25)
+
+plot(mod2, 0.95, 100)
+```
+
+Intuitively, we see that the prediction intervals widen (i.e., become more uncertain) with the greater inclusion of noise.
+
+Finally, `tsgp` can also produce plausible short-term-horizon forecasts on out-of-sample time points:
+
+```{r, message = FALSE, warning = FALSE}
+mod3 <- GP(x1, length(y):150, y, CovSum, 1e-9,
+           sigma_1 = 5, sigma_2 = 1, sigma_3 = 1.2, 
+           l_1 = 75, l_2 = 1, p = 25)
+
+plot(mod3, 0.95, 100)
 ```

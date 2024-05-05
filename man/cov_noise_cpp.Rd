@@ -4,12 +4,14 @@
 \alias{cov_noise_cpp}
 \title{Compute a white noise covariance matrix}
 \usage{
-cov_noise_cpp(sigma, n)
+cov_noise_cpp(xa, xb, sigma)
 }
 \arguments{
-\item{sigma}{\code{double} denoting the variance}
+\item{xa}{\code{NumericVector} of values}
 
-\item{n}{\code{int} denoting the number of rows and columns required in the covariance matrix}
+\item{xb}{\code{NumericVector} of values}
+
+\item{sigma}{\code{double} denoting the variance}
 }
 \value{
 \code{NumericMatrix} of covariance
@@ -18,7 +20,8 @@ cov_noise_cpp(sigma, n)
 Compute a white noise covariance matrix
 }
 \examples{
-cov_noise_cpp(0.05, 100)
+x1 <- seq(from = -2, to = 2, length.out = 100)
+cov_noise_cpp(x1, x1, 0.5)
 }
 \author{
 Trent Henderson

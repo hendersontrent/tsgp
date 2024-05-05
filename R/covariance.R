@@ -62,17 +62,19 @@ cov_periodic <- function(xa, xb, sigma = 1, l = 1, p = 1){
 
 #' Compute a white noise covariance matrix
 #'
+#' @param xa \code{numeric} vector of values
+#' @param xb \code{numeric} vector of values
 #' @param sigma \code{numeric} scalar denoting the variance. Defaults to \code{0.5}
-#' @param n \code{integer} scalar denoting the number of rows and columns required in the covariance matrix
 #' @return \code{GPCov} containing the covariance matrix
 #' @author Trent Henderson
 #' @export
 #' @examples
-#' cov_noise(0.05, 100)
+#' x1 <- seq(from = -2, to = 2, length.out = 100)
+#' cov_noise(x1, x1, 0.5)
 #'
 
-cov_noise <- function(sigma = 0.5, n){
-  X <- cov_noise_cpp(sigma, n)
+cov_noise <- function(xa, xb, sigma = 0.5){
+  X <- cov_noise_cpp(xa, xb, sigma)
   X <- structure(X, class = c("GPCov", "matrix"))
   return(X)
 }
