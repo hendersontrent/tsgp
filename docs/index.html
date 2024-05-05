@@ -126,8 +126,10 @@ visualising covariance matrices, and plotting predictions.</p>
 <h2 id="performance">Performance<a class="anchor" aria-label="anchor" href="#performance"></a>
 </h2>
 <p><code>tsgp</code> is <em>extremely</em> fast at what it does. Well,
-as fast as it can be given the <span class="math inline">𝒪(<em>N</em><sup>3</sup>)</span> computation time of
-inverting a matrix involved in fitting a GP. A full model with trend,
+as fast as it can be given the computation time involved in computing a
+GP posterior. <code>tsgp</code> implements well-known methods for
+efficiency and stability, such as using the Cholesky factorisation
+instead of computing a matrix inverse directly. A full model with trend,
 seasonality, and noise can be calculated on a time series of <span class="math inline"><em>T</em> = 1000</span> time points in a few
 seconds. This makes it an ideal tool for iterative model building and
 principled time-series exploration.</p>
