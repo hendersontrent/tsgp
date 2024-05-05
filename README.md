@@ -57,8 +57,10 @@ and plotting predictions.
 ## Performance
 
 `tsgp` is *extremely* fast at what it does. Well, as fast as it can be
-given the $\mathcal{O}(N^{3})$ computation time of inverting a matrix
-involved in fitting a GP. A full model with trend, seasonality, and
-noise can be calculated on a time series of $T = 1000$ time points in a
-few seconds. This makes it an ideal tool for iterative model building
-and principled time-series exploration.
+given the computation time involved in computing a GP posterior. `tsgp`
+implements well-known methods for efficiency and stability, such as
+using the Cholesky factorisation instead of computing a matrix inverse
+directly. A full model with trend, seasonality, and noise can be
+calculated on a time series of $T = 1000$ time points in a few seconds.
+This makes it an ideal tool for iterative model building and principled
+time-series exploration.

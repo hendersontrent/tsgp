@@ -3,7 +3,7 @@ pkgdown: 2.0.2
 pkgdown_sha: ~
 articles:
   tsgp: tsgp.html
-last_built: 2024-05-05T22:16Z
+last_built: 2024-05-05T22:23Z
 urls:
   reference: https://hendersontrent.github.io/tsgp/reference
   article: https://hendersontrent.github.io/tsgp/articles
