@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{\code{TSGP} object containing the model}
 
-\item{prob}{\code{numeric} scalar denoting the probability for the credible interval. Defaults to \code{0.95} for 95% interval}
+\item{prob}{\code{numeric} scalar denoting the probability for the credible interval. Defaults to \code{0.95} for 95 per cent interval}
 
 \item{draws}{\code{integer} denoting the number of draws to take from the posterior. Defaults to \code{100}}
 
@@ -23,19 +23,20 @@ Plot summary of draws from GP posterior
 }
 \examples{
 x1 <- 1:100
-y <- 3 * sin(2 * seq(0, 4 * pi, length.out = 100)) + runif(100) * 2 + (0.08 * seq(from = 1, to = 100, by = 1))
 
-CovSum <- function(xa, xb, sigma_1 = 1, sigma_2 = 1, sigma_3 = 1, l_1 = 1, l_2 = 1, p = 1){
+y <- 3 * sin(2 * seq(0, 4 * pi, length.out = 100)) +
+  runif(100) * 2 + (0.08 * seq(from = 1, to = 100, by = 1))
+
+CovSum <- function(xa, xb, sigma_1 = 1, sigma_2 = 1, l_1 = 1, l_2 = 1, p = 1){
   Sigma_exp_quad <- cov_exp_quad(xa, xb, sigma_1, l_1)
   Sigma_periodic <- cov_periodic(xa, xb, sigma_2, l_2, p)
-  Sigma_noise <- cov_noise(xa, xb, sigma_3)
-  X <- Sigma_exp_quad + Sigma_periodic + Sigma_noise
+  X <- Sigma_exp_quad + Sigma_periodic
   X <- structure(X, class = c("GPCov", "matrix"))
   return(X)
 }
 
-mod <- GP(x1, 1:length(y), y, CovSum,
-          sigma_1 = 5, sigma_2 = 1, sigma_3 = 0.5,
+mod <- GP(x1, 1:length(y), y, CovSum, 0.8,
+          sigma_1 = 5, sigma_2 = 1,
           l_1 = 75, l_2 = 1, p = 25)
 
 plot(mod, 0.95, 100)

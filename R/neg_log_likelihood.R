@@ -6,11 +6,12 @@
 #' @param y \code{numeric} vector of values to learn from
 #' @param covfun \code{function} specifying the covariance function to use
 #' @param noise \code{numeric} scalar denoting the noise variance to add to the (x, x) covariance matrix of observations. Defaults to \code{0} for no noise modelling
+#' @param ... arguments to be passed to methods
 #' @return \code{numeric} scalar of the negative log likelihood
 #' @author Trent Henderson
 #'
 
-neg_log_likelihood <- function(params, x, xprime, y, covfun, noise = 0) {
+neg_log_likelihood <- function(params, x, xprime, y, covfun, noise = 0, ...) {
 
   # Calculate covariance matrices
 

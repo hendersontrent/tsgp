@@ -1,6 +1,7 @@
 #' Plot a covariance matrix
 #'
-#' @importFrom stats reshape
+#' @importFrom rlang .data
+#' @importFrom stats reshape as.formula
 #' @importFrom MASS mvrnorm
 #' @importFrom ggplot2 ggplot aes geom_line labs theme_bw theme geom_tile scale_fill_viridis_c
 #' @param x \code{GPCov} object containing the covariance matrix
@@ -46,7 +47,7 @@ plot.GPCov <- function(x, xa, type = c("prior", "matrix"), k = 5, ...){
 
     # Draw plot
 
-    p <- ggplot2::ggplot(data = draws, ggplot2::aes(x = x, y = y, colour = draw)) +
+    p <- ggplot2::ggplot(data = draws, ggplot2::aes(x = .data$x, y = .data$y, colour = .data$draw)) +
       ggplot2::geom_line(linewidth = 0.7) +
       ggplot2::labs(x = "x",
                     y = "y",
@@ -67,7 +68,7 @@ plot.GPCov <- function(x, xa, type = c("prior", "matrix"), k = 5, ...){
                              idvar = "x")
 
     p <- ggplot2::ggplot(data = mat_df) +
-      ggplot2::geom_tile(ggplot2::aes(x = x, y = time, fill = values)) +
+      ggplot2::geom_tile(ggplot2::aes(x = .data$x, y = .data$time, fill = .data$values)) +
       ggplot2::labs(x = "x",
                     y = "x",
                     fill = "k(x,x')") +
@@ -84,9 +85,11 @@ plot.GPCov <- function(x, xa, type = c("prior", "matrix"), k = 5, ...){
 
 #' Plot summary of draws from GP posterior
 #'
-#' @importFrom stats qnorm median
+#' @importFrom rlang .data
+#' @importFrom stats qnorm median aggregate
+#' @importFrom MASS mvrnorm
 #' @param x \code{TSGP} object containing the model
-#' @param prob \code{numeric} scalar denoting the probability for the credible interval. Defaults to \code{0.95} for 95% interval
+#' @param prob \code{numeric} scalar denoting the probability for the credible interval. Defaults to \code{0.95} for 95 per cent interval
 #' @param draws \code{integer} denoting the number of draws to take from the posterior. Defaults to \code{100}
 #' @param ... arguments to be passed to methods
 #' @return \code{ggplot} object containing the plot
@@ -94,19 +97,20 @@ plot.GPCov <- function(x, xa, type = c("prior", "matrix"), k = 5, ...){
 #' @export
 #' @examples
 #' x1 <- 1:100
-#' y <- 3 * sin(2 * seq(0, 4 * pi, length.out = 100)) + runif(100) * 2 + (0.08 * seq(from = 1, to = 100, by = 1))
 #'
-#' CovSum <- function(xa, xb, sigma_1 = 1, sigma_2 = 1, sigma_3 = 1, l_1 = 1, l_2 = 1, p = 1){
+#' y <- 3 * sin(2 * seq(0, 4 * pi, length.out = 100)) +
+#'   runif(100) * 2 + (0.08 * seq(from = 1, to = 100, by = 1))
+#'
+#' CovSum <- function(xa, xb, sigma_1 = 1, sigma_2 = 1, l_1 = 1, l_2 = 1, p = 1){
 #'   Sigma_exp_quad <- cov_exp_quad(xa, xb, sigma_1, l_1)
 #'   Sigma_periodic <- cov_periodic(xa, xb, sigma_2, l_2, p)
-#'   Sigma_noise <- cov_noise(xa, xb, sigma_3)
-#'   X <- Sigma_exp_quad + Sigma_periodic + Sigma_noise
+#'   X <- Sigma_exp_quad + Sigma_periodic
 #'   X <- structure(X, class = c("GPCov", "matrix"))
 #'   return(X)
 #' }
 #'
-#' mod <- GP(x1, 1:length(y), y, CovSum,
-#'           sigma_1 = 5, sigma_2 = 1, sigma_3 = 0.5,
+#' mod <- GP(x1, 1:length(y), y, CovSum, 0.8,
+#'           sigma_1 = 5, sigma_2 = 1,
 #'           l_1 = 75, l_2 = 1, p = 25)
 #'
 #' plot(mod, 0.95, 100)
@@ -142,7 +146,7 @@ plot.TSGP <- function(x, prob = 0.95, draws = 100, ...){
   colnames(posterior) <- c("draw", "y", "timepoint")
   rownames(posterior) <- NULL
   posterior$timepoint <- rep(sort(x$xprime), times = draws)
-  posterior_ct <- aggregate(y ~ timepoint, data = posterior, FUN = function(x) mean(x, na.rm = TRUE))
+  posterior_ct <- stats::aggregate(stats::as.formula("y ~ timepoint"), data = posterior, FUN = function(x) mean(x, na.rm = TRUE))
   colnames(posterior_ct) <- c("timepoint", "mu")
   posterior_sd <- data.frame(timepoint = x$xprime, sigma = sqrt(diag(x$Sigma))) # SD is square root of variance
   posterior_summary <- merge(x = posterior_ct, y = posterior_sd, by = "timepoint")
@@ -151,15 +155,15 @@ plot.TSGP <- function(x, prob = 0.95, draws = 100, ...){
 
   # Get original data ready for plotting
 
-  original <- data.frame(timepoint = x$x, y = y)
+  original <- data.frame(timepoint = x$x, y = x$y)
 
   # Draw plot
 
   p <- ggplot2::ggplot(data = posterior_summary) +
-    ggplot2::geom_ribbon(ggplot2::aes(x = timepoint, ymin = lower, ymax = upper), fill = "steelblue2", alpha = 0.5) +
-    ggplot2::geom_line(data = original, ggplot2::aes(x = timepoint, y = y), colour = "black") +
-    ggplot2::geom_point(data = original, ggplot2::aes(x = timepoint, y = y), colour = "black") +
-    ggplot2::geom_line(ggplot2::aes(x = timepoint, y = mu), colour = "steelblue2", size = 1) +
+    ggplot2::geom_ribbon(ggplot2::aes(x = .data$timepoint, ymin = .data$lower, ymax = .data$upper), fill = "steelblue2", alpha = 0.5) +
+    ggplot2::geom_line(data = original, ggplot2::aes(x = .data$timepoint, y = .data$y), colour = "black") +
+    ggplot2::geom_point(data = original, ggplot2::aes(x = .data$timepoint, y = .data$y), colour = "black") +
+    ggplot2::geom_line(ggplot2::aes(x = .data$timepoint, y = .data$mu), colour = "steelblue2", size = 1) +
     ggplot2::labs(title = paste0("Posterior mean and ", round(prob * 100, digits = 0), "% credible interval"),
                   subtitle = paste0("Interval calculated over ", draws, " samples"),
                   x = "Timepoint",
