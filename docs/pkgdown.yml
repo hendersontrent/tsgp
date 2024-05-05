@@ -1,0 +1,10 @@
+pandoc: 2.19.2
+pkgdown: 2.0.2
+pkgdown_sha: ~
+articles:
+  tsgp: tsgp.html
+last_built: 2024-05-05T13:10Z
+urls:
+  reference: https://hendersontrent.github.io/tsgp/reference
+  article: https://hendersontrent.github.io/tsgp/articles
+
