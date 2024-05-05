@@ -14,6 +14,7 @@ Encoding: UTF-8
 Depends: 
     R (>= 3.5.0)
 Imports: 
+    rlang,
     stats,
     MASS,
     ggplot2,
@@ -26,5 +27,6 @@ Suggests:
     rmarkdown,
     testthat (>= 3.0.0)
 RoxygenNote: 7.1.1
+URL: https://hendersontrent.github.io/tsgp/
 VignetteBuilder: knitr
 Config/testthat/edition: 3
