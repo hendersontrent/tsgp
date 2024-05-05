@@ -40,8 +40,9 @@ GP <- function(x, xprime, y, covfun, noise = 0, optim = FALSE,
     #
     # method <- match.arg(method)
     #
-    # opt_result <- optim(par = initial_params, fn = neg_log_likelihood, x = x,
-    #                     xprime = xprime, y = y, covfun = covfun, epsilon = epsilon, method)
+    # opt_result <- stats::optim(par = initial_params, fn = neg_log_likelihood, x = x,
+    #                            xprime = xprime, y = y, covfun = covfun, noise = noise,
+    #                            method = method)
     #
     # optimized_params <- opt_result$par
     #
