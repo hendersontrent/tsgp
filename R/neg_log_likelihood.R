@@ -5,16 +5,16 @@
 #' @param xprime \code{numeric} vector of data points to predict
 #' @param y \code{numeric} vector of values to learn from
 #' @param covfun \code{function} specifying the covariance function to use
-#' @param epsilon \code{numeric} scalar denoting a small quantity to add to the (x, x) covariance matrix for numerical stability. Defaults to \code{1e-9}
+#' @param noise \code{numeric} scalar denoting the noise variance to add to the (x, x) covariance matrix of observations. Defaults to \code{0} for no noise modelling
 #' @return \code{numeric} scalar of the negative log likelihood
 #' @author Trent Henderson
 #'
 
-neg_log_likelihood <- function(params, x, xprime, y, covfun, epsilon = 1e-9) {
+neg_log_likelihood <- function(params, x, xprime, y, covfun, noise = 0) {
 
   # Calculate covariance matrices
 
-  Sigma_11 <- covfun(x, x, ...) + diag(epsilon, length(x)) # Add small diagonal epsilon for numerical stability
+  Sigma_11 <- covfun(x, x, ...) + ((noise ^ 2) * diag(length(x))) # Add noise to observation covariance matrix
   Sigma_12 <- covfun(x, xprime, ...)
   Sigma_inv <- t(solve(Sigma_11, Sigma_12))
   Sigma_22 <- covfun(xprime, xprime, ...)

@@ -60,25 +60,6 @@ cov_periodic <- function(xa, xb, sigma = 1, l = 1, p = 1){
   return(X)
 }
 
-#' Compute a white noise covariance matrix
-#'
-#' @param xa \code{numeric} vector of values
-#' @param xb \code{numeric} vector of values
-#' @param sigma \code{numeric} scalar denoting the variance. Defaults to \code{0.5}
-#' @return \code{GPCov} containing the covariance matrix
-#' @author Trent Henderson
-#' @export
-#' @examples
-#' x1 <- seq(from = -2, to = 2, length.out = 100)
-#' cov_noise(x1, x1, 0.5)
-#'
-
-cov_noise <- function(xa, xb, sigma = 0.5){
-  X <- cov_noise_cpp(xa, xb, sigma)
-  X <- structure(X, class = c("GPCov", "matrix"))
-  return(X)
-}
-
 #' Compute a linear covariance matrix
 #'
 #' @param xa \code{numeric} vector of values
@@ -88,13 +69,14 @@ cov_noise <- function(xa, xb, sigma = 0.5){
 #' @param c \code{numeric} scalar denoting the offset. Defaults to \code{1}
 #' @return \code{NumericMatrix} of covariance
 #' @author Trent Henderson
+#' @export
 #' @examples
 #' x1 <- seq(from = -2, to = 2, length.out = 100)
 #' cov_linear(x1, x1, 0.05, 1, 1)
 #'
 
 cov_linear <- function(xa, xb, sigma_b = 1, sigma_v = 1, c = 1){
-  X <- cov_linear_cpp(sigma, n)
+  X <- cov_linear_cpp(xa, xb, sigma_b, sigma_v, c)
   X <- structure(X, class = c("GPCov", "matrix"))
   return(X)
 }

@@ -45,7 +45,6 @@ Currently, `tsgp` supports the following covariance functions (kernels):
 - Rational quadratic
 - Periodic
 - Linear
-- White noise
 
 `tsgp` flexibly enables composite kernels (either through addition or
 multiplication) to be constructed and is actively encouraged to

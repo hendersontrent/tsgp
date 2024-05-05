@@ -64,7 +64,11 @@ ggplot(data = tmp) +
 
 #### Exponentiated quadratic
 
-`cov_exp_quad` takes the following arguments:
+$$
+k(x, x') = \text{exp} \left( -\frac{1}{2\sigma^{2}}||x - x'||^{2} \right)
+$$
+
+In `tsgp`, cov_exp_quad` takes the following arguments:
 
 * `xa` --- vector of values
 * `xb` --- vector of values
@@ -87,7 +91,11 @@ plot(mat_exp_quad, type = "matrix")
 
 #### Rational quadratic
 
-`cov_rat_quad` takes the following arguments:
+$$
+k(x, x') = \sigma^{2} \left( 1 + \frac{||x - x'||^{2}}{2\alpha \mathcal{l}^{2}} \right)^{-\alpha}
+$$
+
+In `tsgp`, `cov_rat_quad` takes the following arguments:
 
 * `xa` --- vector of values
 * `xb` --- vector of values
@@ -95,9 +103,22 @@ plot(mat_exp_quad, type = "matrix")
 * `alpha` --- scalar $>0$ denoting the mixing coefficient. Defaults to `1`
 * `l` --- scalar denoting the lengthscale. Defaults to `1`
 
+```{r, message = FALSE, warning = FALSE}
+mat_rat_quad <- cov_rat_quad(x2, x2, 1, 1, 1)
+plot(mat_rat_quad, x2, type = "prior", k = 5)
+``` 
+
+```{r, message = FALSE, warning = FALSE, fig.width = 6, fig.height = 6}
+plot(mat_rat_quad, type = "matrix")
+``` 
+
 #### Periodic
 
-`cov_periodic` takes the following arguments:
+$$
+k(x, x') = \sigma^{2} \text{exp} \left( -\frac{2}{\mathcal{l}^{2}}\text{sin}^{2} \left( \pi\frac{|x - x'|}{p} \right) \right)
+$$
+
+In `tsgp`, `cov_periodic` takes the following arguments:
 
 * `xa` --- vector of values
 * `xb` --- vector of values
@@ -105,9 +126,22 @@ plot(mat_exp_quad, type = "matrix")
 * `l` --- scalar denoting the lengthscale. Defaults to `1`
 * `p` --- scalar denoting the period. Defaults to `1`
 
+```{r, message = FALSE, warning = FALSE}
+mat_periodic <- cov_periodic(x2, x2, 1, 1, 1)
+plot(mat_periodic, x2, type = "prior", k = 5)
+``` 
+
+```{r, message = FALSE, warning = FALSE, fig.width = 6, fig.height = 6}
+plot(mat_periodic, type = "matrix")
+``` 
+
 #### Linear
 
-`cov_linear` takes the following arguments:
+$$
+k(x,x') = \sigma^{2}_{b} + \sigma^{2}_{v} (x−c)(x'−c)
+$$
+
+In `tsgp`, `cov_linear` takes the following arguments:
 
 * `xa` --- vector of values
 * `xb` --- vector of values
@@ -115,23 +149,48 @@ plot(mat_exp_quad, type = "matrix")
 * `sigma_v` --- scalar denoting the constant variance. Defaults to `1`
 * `c` --- scalar denoting the offset. Defaults to `1`
 
+```{r, message = FALSE, warning = FALSE}
+mat_linear <- cov_linear(x2, x2, 1, 1, 1)
+plot(mat_linear, x2, type = "prior", k = 5)
+``` 
+
+```{r, message = FALSE, warning = FALSE, fig.width = 6, fig.height = 6}
+plot(mat_linear, type = "matrix")
+``` 
+
 #### White noise
 
-`cov_noise` takes the following arguments:
+$$
+k(x, x') = \sigma^{2}I_{n}
+$$
 
-* `xa` --- vector of values
-* `xb` --- vector of values
-* `sigma` --- scalar denoting the variance. Defaults to `0.5`
+In `tsgp`, noise is handled within the core `GP` function since it only applies to the covariance matrix between observations. The `GP` function is discussed later in this vignette.
+
+However, for visual comparison to the other covariance functions, here is what it looks like:
+
+```{r, message = FALSE, warning = FALSE}
+cov_noise <- function(x, sigma = 0.5){
+  X <- sigma * diag(length(x))
+  X <- structure(X, class = c("GPCov", "matrix"))
+  return(X)
+}
+
+mat_noise <- cov_noise(x2, 0.5)
+plot(mat_noise, x2, type = "prior", k = 5)
+``` 
+
+```{r, message = FALSE, warning = FALSE, fig.width = 6, fig.height = 6}
+plot(mat_noise, type = "matrix")
+``` 
 
 #### Combining covariance functions
 
 Often in time-series analysis we need our models to capture multiple different statistical dynamics simultaneusly, such as trend, seasonality, and noise. It is quite easy to define a custom composite kernel function which either sums or multiplies different kernels:
 
 ```{r, message = FALSE, warning = FALSE}
-CovSum <- function(xa, xb, sigma_1 = 1, sigma_2 = 1, sigma_3 = 1, l_1 = 1, l_2 = 1, p = 1){
+CovSum <- function(xa, xb, sigma_1 = 1, sigma_2 = 1, l_1 = 1, l_2 = 1, p = 1){
   X <- cov_exp_quad(xa, xb, sigma_1, l_1) + 
-    cov_periodic(xa, xb, sigma_2, l_2, p) + 
-    cov_noise(xa, xb, sigma_3)
+    cov_periodic(xa, xb, sigma_2, l_2, p)
   
   X <- structure(X, class = c("GPCov", "matrix"))
   return(X)
@@ -146,15 +205,14 @@ The core `GP` function in `tsgp` to calculate the posterior mean vector and cova
 * `xprime` --- vector of data points to predict values for
 * `y` --- vector of values to learn from
 * `covfun` --- function specifying the covariance
-* `epsilon` --- small quantity to add to the $(x, x)$ covariance matrix for numerical stability. Defaults to $1e^{-9}$
+* `noise` --- scalar denoting the noise variance to add to the $(x, x)$ covariance matrix of observations. Defaults to `0` for no noise modelling
 * `...` --- hyperparameters to be passed to `cov_function`
 
 Here is an example for a model which predicts values for a set of uniformally-distributed time points over the $[1-100]$ domain:
 
 ```{r, message = FALSE, warning = FALSE}
-mod <- GP(x1, seq(from = 1, to = 100, by = 5), y, CovSum, 1e-9,
-           sigma_1 = 5, sigma_2 = 1, sigma_3 = 2, 
-           l_1 = 75, l_2 = 1, p = 25)
+mod <- GP(x1, seq(from = 1, to = 100, by = 5), y, CovSum, noise = 0.8,
+           sigma_1 = 5, sigma_2 = 1, l_1 = 75, l_2 = 1, p = 25)
 
 names(mod)
 ```
@@ -173,22 +231,29 @@ Here is an example:
 plot(mod, 0.95, 100)
 ```
 
-Here is another for a model which predicts $50$ time points but with $1000$ draws:
+Here is another for a model which predicts for all time points but with $1000$ draws:
 
 ```{r, message = FALSE, warning = FALSE}
-mod2 <- GP(x1, seq(from = 1, to = 100, by = 2), y, CovSum, 1e-9,
-           sigma_1 = 5, sigma_2 = 1, sigma_3 = 2, 
-           l_1 = 75, l_2 = 1, p = 25)
+mod2 <- GP(x1, x1, y, CovSum, 0.8,
+           sigma_1 = 5, sigma_2 = 1, l_1 = 75, l_2 = 1, p = 25)
 
 plot(mod2, 0.95, 1000)
+```
+
+Need more uncertainty?
+
+```{r, message = FALSE, warning = FALSE}
+mod3 <- GP(x1, x1, y, CovSum, noise = 1.75,
+           sigma_1 = 5, sigma_2 = 1, l_1 = 75, l_2 = 1, p = 25)
+
+plot(mod3, 0.95, 1000)
 ```
 
 What about a short-range forecast?
 
 ```{r, message = FALSE, warning = FALSE}
-mod3 <- GP(x1, 101:150, y, CovSum, 1e-9,
-           sigma_1 = 5, sigma_2 = 1, sigma_3 = 2, 
-           l_1 = 75, l_2 = 1, p = 25)
+mod4 <- GP(x1, 101:150, y, CovSum, 0.8,
+           sigma_1 = 5, sigma_2 = 1, l_1 = 75, l_2 = 1, p = 25)
 
-plot(mod3, 0.95, 1000)
+plot(mod4, 0.95, 1000)
 ```

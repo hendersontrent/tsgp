@@ -4,7 +4,7 @@
 \alias{neg_log_likelihood}
 \title{Calculate negative marginal log likelihood of a Gaussian process regression model}
 \usage{
-neg_log_likelihood(params, x, xprime, y, covfun, epsilon = 1e-09)
+neg_log_likelihood(params, x, xprime, y, covfun, noise = 0)
 }
 \arguments{
 \item{params}{\code{vector} of hyperparameters}
@@ -17,7 +17,7 @@ neg_log_likelihood(params, x, xprime, y, covfun, epsilon = 1e-09)
 
 \item{covfun}{\code{function} specifying the covariance function to use}
 
-\item{epsilon}{\code{numeric} scalar denoting a small quantity to add to the (x, x) covariance matrix for numerical stability. Defaults to \code{1e-9}}
+\item{noise}{\code{numeric} scalar denoting the noise variance to add to the (x, x) covariance matrix of observations. Defaults to \code{0} for no noise modelling}
 }
 \value{
 \code{numeric} scalar of the negative log likelihood
