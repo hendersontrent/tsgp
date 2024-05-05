@@ -17,7 +17,7 @@ neg_log_likelihood <- function(params, x, xprime, y, covfun, noise = 0, ...) {
 
   Sigma_11 <- covfun(x, x, ...) + ((noise ^ 2) * diag(length(x))) # Add noise to observation covariance matrix
   Sigma_12 <- covfun(x, xprime, ...)
-  Sigma_inv <- t(solve(Sigma_11, Sigma_12))
+  Sigma_inv <- t(chol2inv(chol(Sigma_11)) %*% Sigma_12) # Cholesky for stability
   Sigma_22 <- covfun(xprime, xprime, ...)
   Sigma_2 <- Sigma_22 - (Sigma_inv %*% Sigma_12) # Posterior covariance matrix
   mu_2 <- Sigma_inv %*% y # Posterior mean vector

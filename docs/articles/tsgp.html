@@ -76,7 +76,7 @@
                         <h4 data-toc-skip class="author">Trent
 Henderson</h4>
             
-            <h4 data-toc-skip class="date">2024-05-05</h4>
+            <h4 data-toc-skip class="date">2024-05-06</h4>
       
       <small class="dont-index">Source: <a href="https://github.com/hendersontrent/tsgp/blob/HEAD/vignettes/tsgp.Rmd" class="external-link"><code>vignettes/tsgp.Rmd</code></a></small>
       <div class="d-none name"><code>tsgp.Rmd</code></div>
@@ -149,7 +149,7 @@ class that allows us to make use of R’s generic functions).</p>
 k(x, x') = \text{exp} \left( -\frac{1}{2\sigma^{2}}||x -
 x'||^{2} \right)
 \]</span></p>
-<p>In <code>tsgp</code>, cov_exp_quad` takes the following
+<p>In <code>tsgp</code>, <code>cov_exp_quad</code> takes the following
 arguments:</p>
 <ul>
 <li>
@@ -333,11 +333,11 @@ kernel function which either sums or multiplies different kernels:</p>
 <div class="section level3">
 <h3 id="model-fitting">Model fitting<a class="anchor" aria-label="anchor" href="#model-fitting"></a>
 </h3>
-<p>The core <code>GP</code> function in <code>tsgp</code> to calculate
-the posterior mean vector and covariance matrix. <code>GP</code> returns
-an object of class <code>x</code> which is a list of the input data, the
-posterior mean vector, and the posterior covariance matrix.
-<code>GP</code> takes the following arguments:</p>
+<p>The core function in <code>tsgp</code> to calculate the posterior
+mean vector and covariance matrix is <code>GP</code>. <code>GP</code>
+returns an object of class <code>TSGP</code> which is a list of the
+input data, the posterior mean vector, and the posterior covariance
+matrix. <code>GP</code> takes the following arguments:</p>
 <ul>
 <li>
 <code>x</code> — vector of input data</li>

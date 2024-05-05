@@ -68,7 +68,7 @@ $$
 k(x, x') = \text{exp} \left( -\frac{1}{2\sigma^{2}}||x - x'||^{2} \right)
 $$
 
-In `tsgp`, cov_exp_quad` takes the following arguments:
+In `tsgp`, `cov_exp_quad` takes the following arguments:
 
 * `xa` --- vector of values
 * `xb` --- vector of values
@@ -199,7 +199,7 @@ CovSum <- function(xa, xb, sigma_1 = 1, sigma_2 = 1, l_1 = 1, l_2 = 1, p = 1){
 
 ### Model fitting
 
-The core `GP` function in `tsgp` to calculate the posterior mean vector and covariance matrix. `GP` returns an object of class `x` which is a list of the input data, the posterior mean vector, and the posterior covariance matrix. `GP` takes the following arguments:
+The core function in `tsgp` to calculate the posterior mean vector and covariance matrix is `GP`. `GP` returns an object of class `TSGP` which is a list of the input data, the posterior mean vector, and the posterior covariance matrix. `GP` takes the following arguments:
 
 * `x` --- vector of input data
 * `xprime` --- vector of data points to predict values for
