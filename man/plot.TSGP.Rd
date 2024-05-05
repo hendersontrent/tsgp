@@ -25,14 +25,19 @@ Plot summary of draws from GP posterior
 x1 <- 1:100
 y <- 3 * sin(2 * seq(0, 4 * pi, length.out = 100)) + runif(100) * 2 + (0.08 * seq(from = 1, to = 100, by = 1))
 
-CovSum <- function(xa, xb, sigma_1 = 1, sigma_2 = 1, l_1 = 1, l_2 = 1, p = 1){
+CovSum <- function(xa, xb, sigma_1 = 1, sigma_2 = 1, sigma_3 = 1, l_1 = 1, l_2 = 1, p = 1){
   Sigma_exp_quad <- cov_exp_quad(xa, xb, sigma_1, l_1)
   Sigma_periodic <- cov_periodic(xa, xb, sigma_2, l_2, p)
-  Sigma <- Sigma_exp_quad + Sigma_periodic
-  return(Sigma)
+  Sigma_noise <- cov_noise(xa, xb, sigma_3)
+  X <- Sigma_exp_quad + Sigma_periodic + Sigma_noise
+  X <- structure(X, class = c("GPCov", "matrix"))
+  return(X)
 }
 
-mod <- GP(x1, 1:length(y), y, CovSum, 0.5)
+mod <- GP(x1, 1:length(y), y, CovSum,
+          sigma_1 = 5, sigma_2 = 1, sigma_3 = 0.5,
+          l_1 = 75, l_2 = 1, p = 25)
+
 plot(mod, 0.95, 100)
 
 }

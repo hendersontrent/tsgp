@@ -39,18 +39,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// cov_noise_cpp
-NumericMatrix cov_noise_cpp(double sigma, int n);
-RcppExport SEXP _tsgp_cov_noise_cpp(SEXP sigmaSEXP, SEXP nSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type sigma(sigmaSEXP);
-    Rcpp::traits::input_parameter< int >::type n(nSEXP);
-    rcpp_result_gen = Rcpp::wrap(cov_noise_cpp(sigma, n));
-    return rcpp_result_gen;
-END_RCPP
-}
 // cov_periodic_cpp
 NumericMatrix cov_periodic_cpp(NumericVector xa, NumericVector xb, double sigma, double l, int p);
 RcppExport SEXP _tsgp_cov_periodic_cpp(SEXP xaSEXP, SEXP xbSEXP, SEXP sigmaSEXP, SEXP lSEXP, SEXP pSEXP) {
@@ -85,7 +73,6 @@ END_RCPP
 static const R_CallMethodDef CallEntries[] = {
     {"_tsgp_cov_exp_quad_cpp", (DL_FUNC) &_tsgp_cov_exp_quad_cpp, 4},
     {"_tsgp_cov_linear_cpp", (DL_FUNC) &_tsgp_cov_linear_cpp, 5},
-    {"_tsgp_cov_noise_cpp", (DL_FUNC) &_tsgp_cov_noise_cpp, 2},
     {"_tsgp_cov_periodic_cpp", (DL_FUNC) &_tsgp_cov_periodic_cpp, 5},
     {"_tsgp_cov_rat_quad_cpp", (DL_FUNC) &_tsgp_cov_rat_quad_cpp, 5},
     {NULL, NULL, 0}

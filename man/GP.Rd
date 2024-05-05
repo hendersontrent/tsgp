@@ -4,18 +4,33 @@
 \alias{GP}
 \title{Calculate posterior mean vector and covariance matrix}
 \usage{
-GP(x, xprime, y, covfun, sigma_noise = 0.5, ...)
+GP(
+  x,
+  xprime,
+  y,
+  covfun,
+  noise = 0,
+  optim = FALSE,
+  method = c("L-BFGS-B", "Nelder-Mead", "BFGS", "CG", "SANN", "Brent"),
+  ...
+)
 }
 \arguments{
 \item{x}{\code{numeric} vector of input data}
 
 \item{xprime}{\code{numeric} vector of data points to predict}
 
-\item{y}{\code{numeric} vector values to learn from}
+\item{y}{\code{numeric} vector of values to learn from}
 
 \item{covfun}{\code{function} specifying the covariance function to use}
 
-\item{sigma_noise}{\code{numeric} scalar denoting the variance of the noise to be added to the covariance matrix. Defaults to \code{0.5}}
+\item{noise}{\code{numeric} scalar denoting the noise variance to add to the (x, x) covariance matrix of observations. Defaults to \code{0} for no noise modelling}
+
+\item{optim}{\code{Boolean} whether to optimise hyperparameters using negative marginal log likelihood. Defaults to \code{FALSE}}
+
+\item{method}{\code{character} denoting the optimisation algorithm in \code{stats::optim} to use if \code{optim = TRUE}. Defaults to \code{"L-BFGS-B"}}
+
+\item{...}{covariance function hyperparameters to be passed to the covariance functions within \code{cov_function}}
 }
 \value{
 \code{TSGP} object containing the input data, posterior mean function and covariance matrix
@@ -30,11 +45,14 @@ y <- 3 * sin(2 * seq(0, 4 * pi, length.out = 100)) + runif(100) * 2 + (0.08 * se
 CovSum <- function(xa, xb, sigma_1 = 1, sigma_2 = 1, l_1 = 1, l_2 = 1, p = 1){
   Sigma_exp_quad <- cov_exp_quad(xa, xb, sigma_1, l_1)
   Sigma_periodic <- cov_periodic(xa, xb, sigma_2, l_2, p)
-  Sigma <- Sigma_exp_quad + Sigma_periodic
-  return(Sigma)
+  X <- Sigma_exp_quad + Sigma_periodic
+  X <- structure(X, class = c("GPCov", "matrix"))
+  return(X)
 }
 
-mod <- GP(x1, 1:length(y), y, CovSum, 0.5)
+mod <- GP(x1, 1:length(y), y, CovSum, 0.8,
+          sigma_1 = 5, sigma_2 = 1,
+          l_1 = 75, l_2 = 1, p = 25)
 
 }
 \author{

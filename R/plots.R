@@ -49,7 +49,7 @@ plot.GPCov <- function(x, xa, type = c("prior", "matrix"), k = 5, ...){
     p <- ggplot2::ggplot(data = draws, ggplot2::aes(x = x, y = y, colour = draw)) +
       ggplot2::geom_line(linewidth = 0.7) +
       ggplot2::labs(x = "x",
-                    y = "y = f(x)",
+                    y = "y",
                     colour = NULL) +
       ggplot2::theme_bw() +
       ggplot2::theme(legend.position = "bottom")
@@ -96,14 +96,19 @@ plot.GPCov <- function(x, xa, type = c("prior", "matrix"), k = 5, ...){
 #' x1 <- 1:100
 #' y <- 3 * sin(2 * seq(0, 4 * pi, length.out = 100)) + runif(100) * 2 + (0.08 * seq(from = 1, to = 100, by = 1))
 #'
-#' CovSum <- function(xa, xb, sigma_1 = 1, sigma_2 = 1, l_1 = 1, l_2 = 1, p = 1){
+#' CovSum <- function(xa, xb, sigma_1 = 1, sigma_2 = 1, sigma_3 = 1, l_1 = 1, l_2 = 1, p = 1){
 #'   Sigma_exp_quad <- cov_exp_quad(xa, xb, sigma_1, l_1)
 #'   Sigma_periodic <- cov_periodic(xa, xb, sigma_2, l_2, p)
-#'   Sigma <- Sigma_exp_quad + Sigma_periodic
-#'   return(Sigma)
+#'   Sigma_noise <- cov_noise(xa, xb, sigma_3)
+#'   X <- Sigma_exp_quad + Sigma_periodic + Sigma_noise
+#'   X <- structure(X, class = c("GPCov", "matrix"))
+#'   return(X)
 #' }
 #'
-#' mod <- GP(x1, 1:length(y), y, CovSum, 0.5)
+#' mod <- GP(x1, 1:length(y), y, CovSum,
+#'           sigma_1 = 5, sigma_2 = 1, sigma_3 = 0.5,
+#'           l_1 = 75, l_2 = 1, p = 25)
+#'
 #' plot(mod, 0.95, 100)
 #'
 
@@ -136,6 +141,7 @@ plot.TSGP <- function(x, prob = 0.95, draws = 100, ...){
 
   colnames(posterior) <- c("draw", "y", "timepoint")
   rownames(posterior) <- NULL
+  posterior$timepoint <- rep(sort(x$xprime), times = draws)
   posterior_ct <- aggregate(y ~ timepoint, data = posterior, FUN = function(x) mean(x, na.rm = TRUE))
   colnames(posterior_ct) <- c("timepoint", "mu")
   posterior_sd <- data.frame(timepoint = x$xprime, sigma = sqrt(diag(x$Sigma))) # SD is square root of variance
