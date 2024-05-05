@@ -2,9 +2,9 @@
 #'
 #' @param x \code{numeric} vector of input data
 #' @param xprime \code{numeric} vector of data points to predict
-#' @param y \code{numeric} vector values to learn from
+#' @param y \code{numeric} vector of values to learn from
 #' @param covfun \code{function} specifying the covariance function to use
-#' @param sigma_noise \code{numeric} scalar denoting the variance of the noise to be added to the covariance matrix. Defaults to \code{0.5}
+#' @param epsilon \code{numeric} scalar denoting a small quantity to add to the (x, x) covariance matrix for numerical stability. Defaults to \code{1e-9}
 #' @return \code{TSGP} object containing the input data, posterior mean function and covariance matrix
 #' @author Trent Henderson
 #' @export
@@ -15,15 +15,16 @@
 #' CovSum <- function(xa, xb, sigma_1 = 1, sigma_2 = 1, l_1 = 1, l_2 = 1, p = 1){
 #'   Sigma_exp_quad <- cov_exp_quad(xa, xb, sigma_1, l_1)
 #'   Sigma_periodic <- cov_periodic(xa, xb, sigma_2, l_2, p)
-#'   Sigma <- Sigma_exp_quad + Sigma_periodic
+#'   Sigma_noise <- cov_noise(0.8, nrow(Sigma_exp_quad))
+#'   Sigma <- Sigma_exp_quad + Sigma_periodic + Sigma_noise
 #'   return(Sigma)
 #' }
 #'
-#' mod <- GP(x1, 1:length(y), y, CovSum, 0.5)
+#' mod <- GP(x1, 1:length(y), y, CovSum)
 #'
 
-GP <- function(x, xprime, y, covfun, sigma_noise = 0.5, ...){
-  Sigma_11 <- covfun(x, x, ...) + diag(sigma_noise ^ 2, length(x))
+GP <- function(x, xprime, y, covfun, epsilon = 1e-9, ...){
+  Sigma_11 <- covfun(x, x, ...) + diag(epsilon, length(x)) # Add small diagonal epsilon for numerical stability
   Sigma_12 <- covfun(x, xprime, ...)
   Sigma_inv <- t(solve(Sigma_11, Sigma_12))
   Sigma_22 <- covfun(xprime, xprime, ...)
